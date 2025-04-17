@@ -22,7 +22,9 @@ ChartJS.register(
   ArcElement
 );
 
-const API_URL = "http://localhost:3000";
+// Update API URL to work in both development and production environments
+const API_URL =
+  process.env.NODE_ENV === "production" ? "" : "http://localhost:3000";
 
 const TyreDetectionApp = ({ user, onLogout }) => {
   const [uploadedImage, setUploadedImage] = useState(null);

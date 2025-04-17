@@ -15,10 +15,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-# Configure CORS properly - allow requests from Express server
+# Configure CORS properly
 CORS(app, resources={
     r"/*": {
-        "origins": ["http://localhost:3000", "http://localhost:5173"],
+        "origins": "*",
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization", "Accept"],
         "supports_credentials": True
@@ -26,7 +26,7 @@ CORS(app, resources={
 })
 
 # Load the model
-MODEL_PATH = os.environ.get('MODEL_PATH', '/Users/hrushireddy/Documents/project/tyre-detection-model/model.h5')
+MODEL_PATH = os.environ.get('MODEL_PATH', 'model/model.h5')
 try:
     logger.info(f"Loading model from {MODEL_PATH}")
     model = tf.keras.models.load_model(MODEL_PATH)
@@ -37,26 +37,14 @@ except Exception as e:
 
 def preprocess_image(img_bytes, img_size=(128, 128)):
     try:
-        # Log the received image size
-        logger.info(f"Received image size: {len(img_bytes)} bytes")
-        
-        # Convert bytes to PIL Image
         img = Image.open(io.BytesIO(img_bytes))
-        logger.info(f"Original image size: {img.size}")
-        
-        # Resize image
         img = img.resize(img_size)
-        logger.info(f"Resized to: {img_size}")
-        
-        # Convert to array and preprocess
         img_array = image.img_to_array(img)
         img_array = np.expand_dims(img_array, axis=0)
-        img_array = img_array / 255.0
-        
+        img_array = img_array / 255.0  # Normalize
         return img_array
     except Exception as e:
         logger.error(f"Error preprocessing image: {str(e)}")
-        logger.error(traceback.format_exc())
         raise
 
 @app.route('/predict', methods=['POST', 'OPTIONS'])
@@ -123,10 +111,30 @@ def health_check():
         'model_path': MODEL_PATH
     })
 
+@app.route('/', methods=['GET'])
+def home():
+    return """
+    <html>
+        <head>
+            <title>Tyre Detection API</title>
+            <style>
+                body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+                h1 { color: #0891b2; }
+                pre { background-color: #f5f5f5; padding: 15px; border-radius: 5px; }
+            </style>
+        </head>
+        <body>
+            <h1>🚗 Tyre Detection API</h1>
+            <p>Send POST requests to <code>/predict</code> with an image file to analyze tyre condition.</p>
+            <p>This API returns predictions about tire quality.</p>
+        </body>
+    </html>
+    """
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     host = os.environ.get('HOST', '0.0.0.0')
-    debug = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
+    debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
     
     logger.info(f"Starting Flask server on {host}:{port} (debug={debug})")
     app.run(host=host, port=port, debug=debug)
