@@ -8,8 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "node backend/server.js",
-    "heroku-postbuild": "npm install --prefix backend && npm run build"
+    "start": "node backend/server.js"
+    
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.12",
