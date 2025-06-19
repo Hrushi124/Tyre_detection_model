@@ -9,10 +9,10 @@ const axios = require("axios");
 const FormData = require("form-data");
 const path = require("path");
 const fs = require("fs");
-require("dotenv").config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+
+// Environment variables
 const FLASK_API_URL = process.env.FLASK_API_URL || "http://localhost:5000";
 const FRONTEND_URL =
   process.env.FRONTEND_URL || "https://tyre-detection-model.vercel.app";
@@ -43,22 +43,18 @@ const connectToDatabase = async () => {
 
   try {
     await mongoose.connect(MONGODB_URI, {
-      useUnifiedTopology: true,
       useNewUrlParser: true,
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-      maxPoolSize: 10, // Maintain up to 10 socket connections
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
     });
     isConnected = true;
     console.log("Connected to MongoDB");
-  } catch (err) {
-    console.error("MongoDB connection error:", err);
-    // Don't exit process in serverless environment
-    throw err;
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    throw error;
   }
 };
-
-// Initialize connection
-connectToDatabase().catch(console.error);
 
 // User Schema
 const userSchema = new mongoose.Schema({
@@ -70,9 +66,9 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
-// Analysis History Schema (Updated with details)
+// Analysis History Schema
 const analysisSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   image: { type: Buffer, required: true },
@@ -89,13 +85,12 @@ const analysisSchema = new mongoose.Schema({
   },
 });
 
-const Analysis = mongoose.model("Analysis", analysisSchema);
+const Analysis =
+  mongoose.models.Analysis || mongoose.model("Analysis", analysisSchema);
 
 // Configure CORS
 const allowedOrigins = [
   "https://tyre-detection-model.vercel.app",
-  "https://tyre-detection-reactjs.vercel.app",
-  "https://tyre-detection-backend.vercel.app",
   "http://localhost:5173",
   "http://localhost:3000",
 ];
@@ -103,37 +98,22 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (mobile apps, Postman, etc.)
       if (!origin) return callback(null, true);
-
       if (
         allowedOrigins.indexOf(origin) !== -1 ||
         process.env.NODE_ENV === "development"
       ) {
         callback(null, true);
       } else {
-        console.log("CORS blocked origin:", origin);
         callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
 
 app.use(express.json());
-
-// Ensure database connection for each request
-app.use(async (req, res, next) => {
-  try {
-    await connectToDatabase();
-    next();
-  } catch (error) {
-    console.error("Database connection failed:", error);
-    res.status(500).json({ error: "Database connection failed" });
-  }
-});
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -237,6 +217,8 @@ app.get("/test-flask-connection", async (req, res) => {
 
 app.post("/api/signup", async (req, res) => {
   try {
+    await connectToDatabase();
+
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
       return res
@@ -271,6 +253,8 @@ app.post("/api/signup", async (req, res) => {
 
 app.post("/api/login", async (req, res) => {
   try {
+    await connectToDatabase();
+
     const { email, password } = req.body;
     if (!email || !password) {
       return res
@@ -300,6 +284,8 @@ app.post("/api/login", async (req, res) => {
 
 app.post("/api/forgot-password", async (req, res) => {
   try {
+    await connectToDatabase();
+
     const { email } = req.body;
     if (!email)
       return res.status(400).json({ error: "Please provide an email address" });
@@ -314,7 +300,7 @@ app.post("/api/forgot-password", async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
-    const transporter = nodemailer.createTransport({
+    const transporter = nodemailer.createTransporter({
       service: EMAIL_SERVICE,
       auth: { user: EMAIL_SENDER, pass: EMAIL_PASSWORD },
     });
@@ -343,6 +329,8 @@ app.post("/api/forgot-password", async (req, res) => {
 
 app.post("/api/verify-otp", async (req, res) => {
   try {
+    await connectToDatabase();
+
     const { email, otp } = req.body;
     const user = await User.findOne({
       email,
@@ -364,6 +352,8 @@ app.post("/api/verify-otp", async (req, res) => {
 
 app.post("/api/reset-password", async (req, res) => {
   try {
+    await connectToDatabase();
+
     const { tempToken, newPassword } = req.body;
     const decoded = jwt.verify(tempToken, JWT_SECRET);
     const user = await User.findById(decoded.userId);
@@ -384,13 +374,21 @@ app.post("/api/reset-password", async (req, res) => {
 });
 
 app.get("/api/profile", authenticate, async (req, res) => {
-  res.json({
-    user: { id: req.user._id, name: req.user.name, email: req.user.email },
-  });
+  try {
+    await connectToDatabase();
+    res.json({
+      user: { id: req.user._id, name: req.user.name, email: req.user.email },
+    });
+  } catch (error) {
+    console.error("Profile error:", error);
+    res.status(500).json({ error: "Server error fetching profile" });
+  }
 });
 
 app.get("/stats", authenticate, async (req, res) => {
   try {
+    await connectToDatabase();
+
     const totalChecked = await Analysis.countDocuments({
       userId: req.user._id,
     });
@@ -412,9 +410,10 @@ app.get("/stats", authenticate, async (req, res) => {
   }
 });
 
-// Updated /predict Endpoint
 app.post("/predict", authenticate, upload.single("image"), async (req, res) => {
   try {
+    await connectToDatabase();
+
     if (!req.file)
       return res.status(400).json({ error: "No image file provided" });
 
@@ -447,7 +446,6 @@ app.post("/predict", authenticate, upload.single("image"), async (req, res) => {
     const predictionIsGood = flaskResponse.data.prediction === "Good";
     const probability = flaskResponse.data.probability;
 
-    // Compute detailed results
     const analysisDetails = {
       wear: {
         score: predictionIsGood ? 85 : 40,
@@ -511,9 +509,10 @@ app.post("/predict", authenticate, upload.single("image"), async (req, res) => {
   }
 });
 
-// Updated /api/history Endpoint
 app.get("/api/history", authenticate, async (req, res) => {
   try {
+    await connectToDatabase();
+
     const history = await Analysis.find({ userId: req.user._id })
       .sort({ date: -1 })
       .limit(50);
@@ -524,7 +523,7 @@ app.get("/api/history", authenticate, async (req, res) => {
       status: entry.prediction === "Good" ? "PASS" : "FAIL",
       confidence: Math.round(entry.probability * 100),
       image: `data:image/jpeg;base64,${entry.image.toString("base64")}`,
-      details: entry.details, // Include detailed breakdown
+      details: entry.details,
     }));
 
     const monthlyTrends = await Analysis.aggregate([
@@ -569,9 +568,10 @@ app.get("/api/history", authenticate, async (req, res) => {
   }
 });
 
-// Analytics Endpoint
 app.get("/api/analytics", authenticate, async (req, res) => {
   try {
+    await connectToDatabase();
+
     const monthlyTrends = await Analysis.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(req.user._id) } },
       {
@@ -652,14 +652,5 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start the server (only if not in Vercel environment)
-if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
-  app.listen(PORT, () => {
-    console.log(`Express server running on port ${PORT}`);
-    console.log(`Connected to Flask API at ${FLASK_API_URL}`);
-    console.log(`Serving frontend at ${FRONTEND_URL}`);
-  });
-}
-
-// Export the Express API for Vercel
+// Export for Vercel
 module.exports = app;
