@@ -1,0 +1,5 @@
+version: 2
+builds:
+  - src: .
+    cmd: npm install
+run: npm start

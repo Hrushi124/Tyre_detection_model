@@ -5,6 +5,7 @@
 Your Node.js backend is configured specifically for Vercel deployment!
 
 ### 📁 Project Structure
+
 ```
 backend/
 ├── server.js          # Main server file
@@ -17,6 +18,7 @@ backend/
 ### 🔧 Prerequisites
 
 1. **MongoDB Atlas Account** (Required for production)
+
    - Go to [MongoDB Atlas](https://www.mongodb.com/atlas)
    - Create a free cluster
    - Get your connection string
@@ -30,21 +32,25 @@ backend/
 #### Method 1: Vercel CLI (Recommended)
 
 1. **Navigate to backend directory:**
+
    ```bash
    cd /Users/hrushireddy/Documents/project/tyre-detection-reactjs/backend
    ```
 
 2. **Install Vercel CLI** (if not already installed):
+
    ```bash
    npm i -g vercel
    ```
 
 3. **Login to Vercel:**
+
    ```bash
    vercel login
    ```
 
 4. **Deploy:**
+
    ```bash
    vercel --prod
    ```
@@ -71,16 +77,16 @@ backend/
 2. Navigate to **Settings → Environment Variables**
 3. Add the following variables:
 
-| Variable | Value | Example |
-|----------|-------|---------|
-| `MONGODB_URI` | Your MongoDB Atlas connection string | `mongodb+srv://user:pass@cluster.mongodb.net/tyredetect` |
-| `JWT_SECRET` | Strong random string (32+ characters) | `your-super-secret-jwt-key-here-32chars` |
-| `EMAIL_SENDER` | Your email address | `your-email@gmail.com` |
-| `EMAIL_PASSWORD` | Your email app password | `your-app-password` |
-| `EMAIL_SERVICE` | Email service | `gmail` |
-| `FRONTEND_URL` | Your deployed frontend URL | `https://tyre-detection-model.vercel.app` |
-| `FLASK_API_URL` | Your ML model API URL | `https://your-ml-model.vercel.app` |
-| `NODE_ENV` | Environment | `production` |
+| Variable         | Value                                 | Example                                                  |
+| ---------------- | ------------------------------------- | -------------------------------------------------------- |
+| `MONGODB_URI`    | Your MongoDB Atlas connection string  | `mongodb+srv://user:pass@cluster.mongodb.net/tyredetect` |
+| `JWT_SECRET`     | Strong random string (32+ characters) | `your-super-secret-jwt-key-here-32chars`                 |
+| `EMAIL_SENDER`   | Your email address                    | `your-email@gmail.com`                                   |
+| `EMAIL_PASSWORD` | Your email app password               | `your-app-password`                                      |
+| `EMAIL_SERVICE`  | Email service                         | `gmail`                                                  |
+| `FRONTEND_URL`   | Your deployed frontend URL            | `https://tyre-detection-model.vercel.app`                |
+| `FLASK_API_URL`  | Your ML model API URL                 | `https://your-ml-model.vercel.app`                       |
+| `NODE_ENV`       | Environment                           | `production`                                             |
 
 ### 📧 Email Setup (Gmail)
 
@@ -94,16 +100,19 @@ backend/
 ### 🗄️ MongoDB Atlas Setup
 
 1. **Create cluster:**
+
    - Sign up at [MongoDB Atlas](https://www.mongodb.com/atlas)
    - Create a free M0 cluster
    - Choose a cloud provider and region
 
 2. **Database Access:**
+
    - Create a database user
    - Set username and password
    - Grant read/write access
 
 3. **Network Access:**
+
    - Add IP address: `0.0.0.0/0` (allow from anywhere)
    - Or add Vercel's IP ranges for better security
 
@@ -128,6 +137,7 @@ After deploying your backend:
 ### 🧪 Testing Your Deployment
 
 1. **Health Check:**
+
    ```bash
    curl https://your-backend.vercel.app/health
    ```
@@ -159,14 +169,17 @@ After deploying your backend:
 **Common Issues:**
 
 1. **CORS Errors:**
+
    - Check `FRONTEND_URL` environment variable
    - Ensure no trailing slashes in URLs
 
 2. **Database Connection:**
+
    - Verify MongoDB connection string
    - Check network access settings in Atlas
 
 3. **Authentication Issues:**
+
    - Verify `JWT_SECRET` is set
    - Check email configuration
 

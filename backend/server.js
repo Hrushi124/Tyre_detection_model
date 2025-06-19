@@ -14,7 +14,12 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const FLASK_API_URL = process.env.FLASK_API_URL || "http://localhost:5000";
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://tyre-detection-model.vercel.app";
+const FRONTEND_URL =
+  process.env.FRONTEND_URL || "https://tyre-detection-model.vercel.app";  Key: JWT_SECRET
+  Value: tyredetect-super-secret-jwt-key-32chars-long-2025
+  
+  Key: NODE_ENV  
+  Value: production
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/tyredetect";
 const JWT_SECRET = process.env.JWT_SECRET || "tyredetect-secret-key";
@@ -76,7 +81,7 @@ const Analysis = mongoose.model("Analysis", analysisSchema);
 const allowedOrigins = [
   "https://tyre-detection-model.vercel.app",
   "http://localhost:5173",
-  "http://localhost:3000"
+  "http://localhost:3000",
 ];
 
 app.use(
@@ -84,11 +89,14 @@ app.use(
     origin: function (origin, callback) {
       // Allow requests with no origin (mobile apps, etc.)
       if (!origin) return callback(null, true);
-      
-      if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+
+      if (
+        allowedOrigins.indexOf(origin) !== -1 ||
+        process.env.NODE_ENV === "development"
+      ) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
@@ -172,9 +180,9 @@ app.get("/", (req, res) => {
       predict: "/predict",
       history: "/api/history",
       analytics: "/api/analytics",
-      stats: "/stats"
+      stats: "/stats",
     },
-    frontend: "https://tyre-detection-model.vercel.app"
+    frontend: "https://tyre-detection-model.vercel.app",
   });
 });
 
@@ -616,7 +624,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server (only if not in Vercel environment)
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`Express server running on port ${PORT}`);
     console.log(`Connected to Flask API at ${FLASK_API_URL}`);

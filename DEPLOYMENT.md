@@ -116,11 +116,13 @@ npm run preview
 Your frontend is deployed! Now deploy your backend:
 
 1. **Navigate to backend directory:**
+
    ```bash
    cd backend
    ```
 
 2. **Deploy to Vercel:**
+
    ```bash
    vercel --prod
    ```

@@ -7,6 +7,7 @@ Your backend is configured specifically for Vercel serverless deployment!
 ### Quick Deploy
 
 1. **Navigate to backend directory**:
+
    ```bash
    cd backend
    ```
@@ -40,6 +41,7 @@ For detailed instructions, see [BACKEND_DEPLOYMENT.md](./BACKEND_DEPLOYMENT.md)
 ### Option 3: Heroku
 
 1. **Setup**:
+
    ```bash
    npm install -g heroku
    heroku login
@@ -66,6 +68,7 @@ For detailed instructions, see [BACKEND_DEPLOYMENT.md](./BACKEND_DEPLOYMENT.md)
 4. Add it as `MONGODB_URI` environment variable
 
 ### Railway PostgreSQL (Alternative)
+
 Railway also offers PostgreSQL if you prefer SQL databases.
 
 ## 🔧 Environment Variables
@@ -101,7 +104,7 @@ After backend deployment, update your frontend environment variable:
 ## 📁 Files Added for Deployment
 
 - `railway.yml` - Railway configuration
-- `Procfile` - Heroku configuration  
+- `Procfile` - Heroku configuration
 - `.env.example` - Environment variables template
 - Updated CORS to allow your frontend domain
 - Added Node.js version specification
