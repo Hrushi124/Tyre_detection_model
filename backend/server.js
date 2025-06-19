@@ -588,19 +588,6 @@ app.get("/api/analytics", authenticate, async (req, res) => {
   }
 });
 
-// Serve static files from React app in production
-if (process.env.NODE_ENV === "production") {
-  // Set static folder
-  app.use(express.static(path.join(__dirname, "../dist")));
-
-  // For any route that doesn't match the API routes, serve the React app
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "../dist", "index.html"));
-  });
-
-  console.log("Serving React app in production mode");
-}
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
