@@ -1,22 +1,21 @@
 {
   "version": 2,
   "builds": [
-    { "src": "backend/server.js", "use": "@vercel/node" },
-    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } }
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/backend/server.js" },
-    { "handle": "filesystem" },
-    { "src": "/*", "dest": "/index.html" }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "MONGODB_URI": "@mongodb_uri",
-    "JWT_SECRET": "@jwt_secret",
-    "EMAIL_SENDER": "@email_sender",
-    "EMAIL_PASSWORD": "@email_password",
-    "EMAIL_SERVICE": "@email_service",
-    "FLASK_API_URL": "@flask_api_url",
-    "FRONTEND_URL": "@frontend_url"
-  }
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
