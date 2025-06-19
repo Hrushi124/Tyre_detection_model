@@ -27,24 +27,26 @@ const EMAIL_SERVICE = process.env.EMAIL_SERVICE || "gmail";
 console.log("Environment check:");
 console.log("FLASK_API_URL:", FLASK_API_URL);
 console.log("FRONTEND_URL:", FRONTEND_URL);
-console.log(
-  "MongoDB URI:",
-  MONGODB_URI.replace(/mongodb:\/\/.*@/, "mongodb://[hidden]@")
-);
+console.log("MongoDB URI:", MONGODB_URI ? "Set" : "Not set");
+console.log("JWT_SECRET:", JWT_SECRET ? "Set" : "Not set");
 console.log("Node environment:", process.env.NODE_ENV);
+console.log("Vercel environment:", process.env.VERCEL ? "Yes" : "No");
 
 // Connect to MongoDB with better error handling for serverless
 let isConnected = false;
 
 const connectToDatabase = async () => {
-  if (isConnected) {
+  if (isConnected && mongoose.connection.readyState === 1) {
     return;
   }
 
   try {
+    // Close existing connections
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+
     await mongoose.connect(MONGODB_URI, {
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
       serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
       maxPoolSize: 10, // Maintain up to 10 socket connections
     });
@@ -52,13 +54,13 @@ const connectToDatabase = async () => {
     console.log("Connected to MongoDB");
   } catch (err) {
     console.error("MongoDB connection error:", err);
+    isConnected = false;
     // Don't exit process in serverless environment
     throw err;
   }
 };
 
-// Initialize connection
-connectToDatabase().catch(console.error);
+// Don't initialize connection immediately in serverless
 
 // User Schema
 const userSchema = new mongoose.Schema({

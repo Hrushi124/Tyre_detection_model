@@ -1,0 +1,8 @@
+MONGODB_URI=mongodb+srv://hrushipothireddy:r9O15VhunBMeAYs0@tyre-detection.lfntwdg.mongodb.net/tyredetect?retryWrites=true&w=majority&appName=tyre-detection
+JWT_SECRET=tyredetect-super-secret-jwt-key-32chars-long-2025
+EMAIL_SENDER=hrushipothireddy@gmail.com
+EMAIL_PASSWORD=gtjcmdhfagfnsxnb
+EMAIL_SERVICE=gmail
+FRONTEND_URL=https://tyre-detection-reactjs-f99p5gmzh-hrushis-projects-730bf5d0.vercel.app
+NODE_ENV=production
+FLASK_API_URL=http://localhost:5000
