@@ -87,7 +87,7 @@ After deployment, add these environment variables in Vercel:
 1. Deploy your Node.js backend to Vercel (see backend/BACKEND_DEPLOYMENT.md)
 2. Deploy your Python ML model to Vercel or Hugging Face Spaces
 3. Update the `VITE_API_URL` environment variable in Vercel
-4. Your app will be fully functional!
+4. Your app will be fully functional
 
 ### 🛠 Local Development
 
