@@ -14,7 +14,7 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const FLASK_API_URL = process.env.FLASK_API_URL || "http://localhost:5000";
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://tyre-detection-model.vercel.app";
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/tyredetect";
 const JWT_SECRET = process.env.JWT_SECRET || "tyredetect-secret-key";
@@ -73,9 +73,24 @@ const analysisSchema = new mongoose.Schema({
 const Analysis = mongoose.model("Analysis", analysisSchema);
 
 // Configure CORS
+const allowedOrigins = [
+  "https://tyre-detection-model.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000"
+];
+
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (mobile apps, etc.)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -595,9 +610,14 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Express server running on port ${PORT}`);
-  console.log(`Connected to Flask API at ${FLASK_API_URL}`);
-  console.log(`Serving frontend at ${FRONTEND_URL}`);
-});
+// Start the server (only if not in Vercel environment)
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Express server running on port ${PORT}`);
+    console.log(`Connected to Flask API at ${FLASK_API_URL}`);
+    console.log(`Serving frontend at ${FRONTEND_URL}`);
+  });
+}
+
+// Export the Express API for Vercel
+module.exports = app;
