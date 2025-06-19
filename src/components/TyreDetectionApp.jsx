@@ -23,8 +23,7 @@ ChartJS.register(
 );
 
 // Update API URL to work in both development and production environments
-const API_URL =
-  process.env.NODE_ENV === "production" ? "" : "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const TyreDetectionApp = ({ user, onLogout }) => {
   const [uploadedImage, setUploadedImage] = useState(null);

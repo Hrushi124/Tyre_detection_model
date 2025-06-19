@@ -3,7 +3,7 @@ import { useAuth } from "./AuthProvider";
 import axios from "axios";
 
 // API URL - change to match your deployed backend
-const API_URL = "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const HistoryPage = ({ onBack }) => {
   const [historyData, setHistoryData] = useState([]);
