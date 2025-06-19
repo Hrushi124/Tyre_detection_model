@@ -84,8 +84,8 @@ After deployment, add these environment variables in Vercel:
 
 ### 🔄 When You Deploy Your Backend
 
-1. Deploy your Node.js backend (recommend Railway, Render, or Heroku)
-2. Deploy your Python ML model (recommend Hugging Face Spaces or Railway)
+1. Deploy your Node.js backend to Vercel (see backend/BACKEND_DEPLOYMENT.md)
+2. Deploy your Python ML model to Vercel or Hugging Face Spaces
 3. Update the `VITE_API_URL` environment variable in Vercel
 4. Your app will be fully functional!
 
@@ -107,8 +107,29 @@ npm run preview
 
 ### 📱 Current Status
 
-- ✅ **Frontend**: Ready for Vercel deployment
-- ⏳ **Backend**: Not deployed yet (you mentioned you'll do this later)
+- ✅ **Frontend**: Deployed at https://tyre-detection-model.vercel.app
+- ✅ **Backend**: Ready for Vercel deployment (see backend/BACKEND_DEPLOYMENT.md)
 - ⏳ **ML Model**: Not deployed yet
 
-Your frontend is completely ready! Deploy it now and you'll have a beautiful, responsive web app that you can share with others. The authentication and analysis features will activate once you deploy the backend.
+### 🔄 Next Steps - Deploy Backend
+
+Your frontend is deployed! Now deploy your backend:
+
+1. **Navigate to backend directory:**
+   ```bash
+   cd backend
+   ```
+
+2. **Deploy to Vercel:**
+   ```bash
+   vercel --prod
+   ```
+
+3. **Set up environment variables** (see backend/BACKEND_DEPLOYMENT.md for details)
+
+4. **Update frontend API URL:**
+   - Get your backend URL from Vercel
+   - Update `VITE_API_URL` in your frontend project settings
+   - Redeploy frontend
+
+After backend deployment, your authentication and data features will work!
