@@ -160,6 +160,24 @@ const authenticate = async (req, res, next) => {
 };
 
 // API Routes
+app.get("/", (req, res) => {
+  res.json({
+    message: "Tyre Detection API Server",
+    status: "Running",
+    endpoints: {
+      health: "/health",
+      signup: "/api/signup",
+      login: "/api/login",
+      profile: "/api/profile",
+      predict: "/predict",
+      history: "/api/history",
+      analytics: "/api/analytics",
+      stats: "/stats"
+    },
+    frontend: "https://tyre-detection-model.vercel.app"
+  });
+});
+
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK" });
 });
