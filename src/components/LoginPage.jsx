@@ -4,6 +4,9 @@ import { useAuth } from "./AuthProvider";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const LoginPage = ({ switchToSignup, onLoginSuccess }) => {
+  // Debug logging
+  console.log("LoginPage - API_URL:", API_URL);
+  console.log("LoginPage - Environment variables:", import.meta.env);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

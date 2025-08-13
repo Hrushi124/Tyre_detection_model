@@ -27,40 +27,20 @@ const EMAIL_SERVICE = process.env.EMAIL_SERVICE || "gmail";
 console.log("Environment check:");
 console.log("FLASK_API_URL:", FLASK_API_URL);
 console.log("FRONTEND_URL:", FRONTEND_URL);
-console.log("MongoDB URI:", MONGODB_URI ? "Set" : "Not set");
-console.log("JWT_SECRET:", JWT_SECRET ? "Set" : "Not set");
+console.log(
+  "MongoDB URI:",
+  MONGODB_URI.replace(/mongodb:\/\/.*@/, "mongodb://[hidden]@")
+);
 console.log("Node environment:", process.env.NODE_ENV);
-console.log("Vercel environment:", process.env.VERCEL ? "Yes" : "No");
 
-// Connect to MongoDB with better error handling for serverless
-let isConnected = false;
-
-const connectToDatabase = async () => {
-  if (isConnected && mongoose.connection.readyState === 1) {
-    return;
-  }
-
-  try {
-    // Close existing connections
-    if (mongoose.connection.readyState !== 0) {
-      await mongoose.disconnect();
-    }
-
-    await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-      maxPoolSize: 10, // Maintain up to 10 socket connections
-    });
-    isConnected = true;
-    console.log("Connected to MongoDB");
-  } catch (err) {
+// Connect to MongoDB
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => {
     console.error("MongoDB connection error:", err);
-    isConnected = false;
-    // Don't exit process in serverless environment
-    throw err;
-  }
-};
-
-// Don't initialize connection immediately in serverless
+    process.exit(1);
+  });
 
 // User Schema
 const userSchema = new mongoose.Schema({
@@ -96,8 +76,6 @@ const Analysis = mongoose.model("Analysis", analysisSchema);
 // Configure CORS
 const allowedOrigins = [
   "https://tyre-detection-model.vercel.app",
-  "https://tyre-detection-reactjs.vercel.app",
-  "https://tyre-detection-backend.vercel.app",
   "http://localhost:5173",
   "http://localhost:3000",
 ];
@@ -105,7 +83,7 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (mobile apps, Postman, etc.)
+      // Allow requests with no origin (mobile apps, etc.)
       if (!origin) return callback(null, true);
 
       if (
@@ -114,28 +92,15 @@ app.use(
       ) {
         callback(null, true);
       } else {
-        console.log("CORS blocked origin:", origin);
         callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
 
 app.use(express.json());
-
-// Ensure database connection for each request
-app.use(async (req, res, next) => {
-  try {
-    await connectToDatabase();
-    next();
-  } catch (error) {
-    console.error("Database connection failed:", error);
-    res.status(500).json({ error: "Database connection failed" });
-  }
-});
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -204,14 +169,7 @@ app.get("/", (req, res) => {
     message: "Tyre Detection API Server",
     status: "Running",
     endpoints: {
-      health: "/health",
-      signup: "/api/signup",
-      login: "/api/login",
-      profile: "/api/profile",
       predict: "/predict",
-      history: "/api/history",
-      analytics: "/api/analytics",
-      stats: "/stats",
     },
     frontend: "https://tyre-detection-model.vercel.app",
   });
